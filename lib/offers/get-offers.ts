@@ -4,7 +4,9 @@ import type { OfferDetail, OfferListItem } from "@/lib/offers/types";
 type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
 
 const listColumns =
-  "id, title, description, category, credits_required, created_at";
+  "id, title, description, category, credits_required, created_at, short_description, image_url, featured, merchant_name, expiration_date";
+
+const detailColumns = `${listColumns}, status, merchant_website, location, redemption_instructions, terms_and_conditions, updated_at`;
 
 export async function getActiveOffers(
   supabase: ServerSupabase,
@@ -13,6 +15,7 @@ export async function getActiveOffers(
     .from("offers")
     .select(listColumns)
     .eq("status", "active")
+    .order("featured", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -28,7 +31,7 @@ export async function getOfferById(
 ): Promise<OfferDetail | null> {
   const { data, error } = await supabase
     .from("offers")
-    .select(`${listColumns}, status`)
+    .select(detailColumns)
     .eq("id", id)
     .maybeSingle();
 

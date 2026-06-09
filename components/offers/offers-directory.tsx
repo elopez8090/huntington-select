@@ -25,7 +25,15 @@ export function OffersDirectory({ offers }: OffersDirectoryProps) {
     return offers.filter((offer) => {
       if (category !== "all" && offer.category !== category) return false;
       if (!query) return true;
-      return offer.title.toLowerCase().includes(query);
+      const haystack = [
+        offer.title,
+        offer.merchant_name ?? "",
+        offer.short_description ?? "",
+        offer.description,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
     });
   }, [offers, search, category]);
 
