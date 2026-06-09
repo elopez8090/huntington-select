@@ -10,8 +10,8 @@ export function SiteFooter() {
               Huntington Select
             </p>
             <p className="mt-2 text-sm leading-relaxed text-stone-600">
-              A members-only program for curated local offers—redeemed simply
-              with credits you control.
+              A curated local service provider network for Huntington
+              homeowners—and trusted pros who serve the community.
             </p>
           </div>
           <nav

@@ -2,75 +2,109 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteHeader } from "@/components/marketing/site-header";
 
-const steps = [
+const customerSteps = [
   {
     step: "1",
-    title: "Join",
+    title: "Choose a category",
     description:
-      "Create your member account in minutes and step into a curated program built for people who value quality experiences.",
+      "Start with what you need—roofing, plumbing, landscaping, and more. Every category is organized for homeowners in Huntington.",
   },
   {
     step: "2",
-    title: "Buy credits",
+    title: "Browse trusted pros",
     description:
-      "Add credits when you are ready. They are your flexible currency inside the program—no clutter, no guesswork.",
+      "Explore vetted local contractors and service providers selected for quality, professionalism, and community reputation.",
   },
   {
     step: "3",
-    title: "Redeem curated offers",
+    title: "Connect with confidence",
     description:
-      "Browse hand-picked benefits from trusted partners and redeem with a few clicks. Every redemption is tracked for you.",
+      "Reach out knowing each provider earned a place in the network through our curation process—not an open directory.",
   },
 ] as const;
 
-const benefits = [
+const trustReasons = [
   {
-    title: "Curated, not crowded",
+    title: "Local to Huntington",
     description:
-      "Every offer is selected for quality and relevance—so you spend time enjoying benefits, not scrolling endless deals.",
+      "Providers in the network serve Huntington and nearby communities—people who know the area, the homes, and the standards neighbors expect.",
   },
   {
-    title: "Credits you control",
+    title: "Vetted before listing",
     description:
-      "Load credits on your schedule and use them when something fits. Your balance and history stay clear in your member dashboard.",
+      "We review credentials, experience, and reputation before a provider is featured. Not everyone who applies is accepted.",
   },
   {
-    title: "Trusted redemption",
+    title: "Quality over volume",
     description:
-      "Redemptions run through secure member flows with confirmations you can rely on—simple, transparent, and member-first.",
+      "The network stays intentionally curated. You see fewer names, but each one is chosen to represent dependable work and clear communication.",
   },
   {
-    title: "Local & premium partners",
+    title: "Ongoing standards",
     description:
-      "Dining, events, wellness, and services from partners who reflect the standard Huntington Select members expect.",
+      "Membership in Huntington Select reflects a commitment to the bar we set—so homeowners can hire with more peace of mind.",
   },
 ] as const;
 
-const categories = [
+const serviceCategories = [
   {
-    slug: "dining",
-    title: "Dining",
-    description: "Chef-driven tables, wine bars, and neighborhood gems worth the reservation.",
+    slug: "roofing-exterior",
+    title: "Roofing & exterior",
+    description:
+      "Roof repair, siding, gutters, and exterior work from pros who protect your home year-round.",
   },
   {
-    slug: "events",
-    title: "Events",
-    description: "Tickets, previews, and member-only gatherings across the calendar.",
+    slug: "plumbing-hvac",
+    title: "Plumbing & HVAC",
+    description:
+      "Licensed specialists for leaks, heating, cooling, and the systems that keep your home comfortable.",
   },
   {
-    slug: "wellness",
-    title: "Wellness",
-    description: "Spa days, fitness studios, and restorative experiences to recharge.",
+    slug: "electrical",
+    title: "Electrical",
+    description:
+      "Panel upgrades, lighting, and safe electrical work from experienced local electricians.",
   },
   {
-    slug: "services",
-    title: "Services",
-    description: "Concierge-style perks from vetted professionals and local specialists.",
+    slug: "landscaping",
+    title: "Landscaping & outdoor",
+    description:
+      "Lawns, hardscaping, and outdoor living from teams that take pride in Huntington properties.",
   },
   {
-    slug: "experiences",
-    title: "Experiences",
-    description: "One-of-a-kind outings and seasonal highlights you will actually use.",
+    slug: "remodeling",
+    title: "Remodeling & interior",
+    description:
+      "Kitchens, baths, and whole-home updates from craftsmen who respect your space and timeline.",
+  },
+  {
+    slug: "general",
+    title: "General home services",
+    description:
+      "Handyman, cleaning, and specialty trades for the projects that do not fit a single box.",
+  },
+] as const;
+
+const providerBenefits = [
+  {
+    title: "Stand out in a curated network",
+    description:
+      "You are not one of hundreds on a generic listing site. Huntington Select highlights providers we trust and recommend.",
+  },
+  {
+    title: "Homeowners who value quality",
+    description:
+      "Members and visitors come here looking for dependable local pros—not the lowest bid at any cost.",
+  },
+  {
+    title: "Premium local brand",
+    description:
+      "Associate your business with a selective Huntington program built around trust, clarity, and community.",
+  },
+  {
+    title: "Straightforward application",
+    description:
+      "Tell us about your work and credentials. If you are a fit, we will guide you through joining the network.",
   },
 ] as const;
 
@@ -87,28 +121,28 @@ export function HomePage() {
           />
           <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-amber-200/90">
-              Members-only benefits
+              Curated local service network
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
-              Huntington Select
+              Trusted local pros for Huntington homeowners
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-stone-300 sm:text-xl">
-              Huntington Select is a curated membership program. Join once,
-              buy credits when you are ready, and redeem exclusive offers from
-              premium local partners—dining, events, wellness, and more.
+              Huntington Select is a curated network of contractors and service
+              providers for Huntington. Find vetted local professionals for
+              your home—without wading through endless, unverified listings.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
-                href="/register"
+                href="/providers"
                 className="inline-flex h-12 items-center justify-center rounded-full bg-amber-600 px-8 text-base font-semibold text-stone-950 transition-colors hover:bg-amber-500"
               >
-                Join Now
+                Browse Providers
               </Link>
               <Link
-                href="/login"
+                href="/provider-apply"
                 className="inline-flex h-12 items-center justify-center rounded-full border border-stone-600 bg-transparent px-8 text-base font-semibold text-stone-100 transition-colors hover:border-stone-400 hover:bg-stone-900"
               >
-                Member Login
+                Join as a Provider
               </Link>
             </div>
           </div>
@@ -121,15 +155,15 @@ export function HomePage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                How it works
+                How it works for homeowners
               </h2>
               <p className="mt-4 text-base leading-relaxed text-stone-600 sm:text-lg">
-                Three straightforward steps from visitor to member enjoying
-                curated benefits.
+                A simple path from “I need help at home” to a provider you can
+                feel good about contacting.
               </p>
             </div>
             <ol className="mt-12 grid gap-6 md:grid-cols-3">
-              {steps.map((item) => (
+              {customerSteps.map((item) => (
                 <li
                   key={item.step}
                   className="rounded-2xl border border-stone-200 bg-stone-50 p-6 sm:p-8"
@@ -150,56 +184,24 @@ export function HomePage() {
         </section>
 
         <section
-          id="benefits"
+          id="categories"
           className="scroll-mt-20 border-b border-stone-200 py-16 sm:py-20"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                Featured benefits
+                Featured service categories
               </h2>
               <p className="mt-4 text-base leading-relaxed text-stone-600 sm:text-lg">
-                Designed for members who want quality, clarity, and experiences
-                that feel intentional—not transactional.
-              </p>
-            </div>
-            <ul className="mt-12 grid gap-6 sm:grid-cols-2">
-              {benefits.map((benefit) => (
-                <li
-                  key={benefit.title}
-                  className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
-                >
-                  <h3 className="text-lg font-semibold text-stone-900">
-                    {benefit.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600 sm:text-base">
-                    {benefit.description}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section
-          id="categories"
-          className="scroll-mt-20 border-b border-stone-200 bg-white py-16 sm:py-20"
-        >
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
-              <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                Offer categories
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-stone-600 sm:text-lg">
-                A preview of how benefits are organized inside the member
-                catalog. Join to browse live offers and redeem with credits.
+                Common home projects, organized so you can find the right kind
+                of provider faster.
               </p>
             </div>
             <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((category) => (
+              {serviceCategories.map((category) => (
                 <li
                   key={category.slug}
-                  className="group rounded-2xl border border-stone-200 p-6 transition-colors hover:border-amber-600/40 hover:bg-amber-50/30"
+                  className="group rounded-2xl border border-stone-200 bg-white p-6 transition-colors hover:border-amber-600/40 hover:bg-amber-50/30"
                 >
                   <p className="text-xs font-medium uppercase tracking-wider text-amber-800/80">
                     {category.title}
@@ -210,33 +212,114 @@ export function HomePage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-8 text-sm text-stone-500">
-              Full catalog available after you sign in as a member.
-            </p>
+            <div className="mt-10">
+              <Link
+                href="/providers"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-stone-900 px-6 text-sm font-semibold text-white transition-colors hover:bg-stone-800"
+              >
+                Browse all providers
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="trust"
+          className="scroll-mt-20 border-b border-stone-200 bg-white py-16 sm:py-20"
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+                Why our providers are trusted
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-stone-600 sm:text-lg">
+                Huntington Select is selective by design. Here is what
+                “curated” means for your home.
+              </p>
+            </div>
+            <ul className="mt-12 grid gap-6 sm:grid-cols-2">
+              {trustReasons.map((item) => (
+                <li
+                  key={item.title}
+                  className="rounded-2xl border border-stone-200 bg-stone-50 p-6 sm:p-8"
+                >
+                  <h3 className="text-lg font-semibold text-stone-900">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-stone-600 sm:text-base">
+                    {item.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section
+          id="for-providers"
+          className="scroll-mt-20 border-b border-stone-200 py-16 sm:py-20"
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-sm font-medium uppercase tracking-[0.15em] text-amber-800/90">
+                For contractors & service providers
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+                Why join the Huntington Select network
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-stone-600 sm:text-lg">
+                If you take pride in your work and serve Huntington homeowners,
+                we built this network for businesses like yours—not for
+                volume-driven lead dumps.
+              </p>
+            </div>
+            <ul className="mt-12 grid gap-6 sm:grid-cols-2">
+              {providerBenefits.map((item) => (
+                <li
+                  key={item.title}
+                  className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
+                >
+                  <h3 className="text-lg font-semibold text-stone-900">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-stone-600 sm:text-base">
+                    {item.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-10">
+              <Link
+                href="/provider-apply"
+                className="inline-flex h-11 items-center justify-center rounded-full border-2 border-stone-900 bg-transparent px-6 text-sm font-semibold text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
+              >
+                Apply to join the network
+              </Link>
+            </div>
           </div>
         </section>
 
         <section className="bg-stone-950 py-16 text-stone-50 sm:py-20">
           <div className="mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Ready to experience Huntington Select?
+              Ready to find a pro—or join the network?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-stone-400 sm:text-lg">
-              Join the program today. When you are ready, add credits and start
-              redeeming curated offers built for members who expect more.
+              Homeowners: browse curated local providers. Contractors: apply to
+              be considered for Huntington Select membership.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
-                href="/register"
+                href="/providers"
                 className="inline-flex h-12 w-full min-w-[200px] items-center justify-center rounded-full bg-amber-600 px-8 text-base font-semibold text-stone-950 transition-colors hover:bg-amber-500 sm:w-auto"
               >
-                Join Now
+                Browse Providers
               </Link>
               <Link
-                href="/login"
+                href="/provider-apply"
                 className="inline-flex h-12 w-full min-w-[200px] items-center justify-center rounded-full border border-stone-600 px-8 text-base font-semibold text-stone-100 transition-colors hover:border-stone-400 hover:bg-stone-900 sm:w-auto"
               >
-                Member Login
+                Join as a Provider
               </Link>
             </div>
           </div>

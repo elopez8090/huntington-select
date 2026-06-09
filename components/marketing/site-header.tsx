@@ -2,8 +2,9 @@ import Link from "next/link";
 
 const navLinks = [
   { href: "#how-it-works", label: "How it works" },
-  { href: "#benefits", label: "Benefits" },
   { href: "#categories", label: "Categories" },
+  { href: "#trust", label: "Why trust us" },
+  { href: "#for-providers", label: "For providers" },
 ] as const;
 
 export function SiteHeader() {
