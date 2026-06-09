@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+# Huntington Select Project Rules
+
+We are building Huntington Select with:
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Stripe
+- Resend
+- Vercel
+
+User has no coding experience.
+
+Important rules:
+- Make small, focused changes only.
+- Do not rewrite unrelated files.
+- Before editing, explain which files will change.
+- Prefer simple architecture over complex abstractions.
+- Keep code beginner-friendly.
+- Do not add paid services unless requested.
+- Do not expose secret keys in client code.
+- Use Server Components by default.
+- Use Client Components only when interactivity is required.
+- Keep UI clean, modern, mobile-friendly, and easy to navigate.
