@@ -1,5 +1,6 @@
 import { AuthShell } from "@/components/auth/auth-shell";
 import { RegisterForm } from "@/components/auth/register-form";
+import { getPostLoginRedirectPath } from "@/lib/auth/post-login-redirect";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -16,7 +17,7 @@ export default async function RegisterPage() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/dashboard");
+    redirect(await getPostLoginRedirectPath(supabase));
   }
 
   return (

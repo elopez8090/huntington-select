@@ -2,6 +2,7 @@
 
 import { FormMessage } from "@/components/auth/form-message";
 import { getAuthErrorMessage } from "@/lib/auth/errors";
+import { getPostLoginRedirectPath } from "@/lib/auth/post-login-redirect";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -57,7 +58,8 @@ export function RegisterForm() {
 
     if (data.session) {
       setSuccess("Account created. Redirecting to your dashboard…");
-      router.push("/dashboard");
+      const destination = await getPostLoginRedirectPath(supabase);
+      router.push(destination);
       router.refresh();
       return;
     }

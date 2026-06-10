@@ -35,7 +35,7 @@ export function MemberShell({ email, activeNav, children }: MemberShellProps) {
             aria-label="Member"
           >
             <Link href="/dashboard" className={navLinkClass(activeNav === "dashboard")}>
-              Dashboard
+              Customer Dashboard
             </Link>
             <Link href="/offers" className={navLinkClass(activeNav === "offers")}>
               Offers

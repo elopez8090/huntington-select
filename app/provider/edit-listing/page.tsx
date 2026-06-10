@@ -1,5 +1,5 @@
-import { LogoutButton } from "@/components/auth/logout-button";
 import { EditListingForm } from "@/components/provider-dashboard/edit-listing-form";
+import { ProviderDashboardShell } from "@/components/provider-dashboard/provider-dashboard-shell";
 import { getProviderListingForEdit } from "@/lib/provider-dashboard/get-provider-listing-for-edit";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -30,50 +30,35 @@ export default async function ProviderEditListingPage() {
   }
 
   return (
-    <div className="min-h-full bg-stone-50 text-stone-900">
-      <header className="border-b border-stone-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-4 px-4 sm:px-6">
+    <ProviderDashboardShell
+      email={email}
+      activeNav="edit-listing"
+      showEditListingNav
+    >
+      <div className="mb-8">
+        <p className="text-sm font-medium uppercase tracking-[0.15em] text-amber-800/90">
+          Provider
+        </p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+          Edit your listing
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-stone-600">
+          Update the details customers see on your directory profile. Status,
+          categories, and photos are managed separately.
+        </p>
+        <p className="mt-4">
           <Link
-            href="/"
-            className="shrink-0 text-sm font-semibold tracking-tight text-stone-900"
+            href="/provider/dashboard"
+            className="text-sm font-medium text-stone-900 underline-offset-2 hover:underline"
           >
-            Huntington Select
+            Back to Provider Dashboard
           </Link>
-          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-            {email ? (
-              <span className="truncate text-sm text-stone-600">{email}</span>
-            ) : null}
-            <LogoutButton tone="stone" />
-          </div>
-        </div>
-      </header>
+        </p>
+      </div>
 
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.15em] text-amber-800/90">
-            Provider
-          </p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
-            Edit your listing
-          </h1>
-          <p className="mt-2 text-sm leading-relaxed text-stone-600">
-            Update the details customers see on your directory profile. Status,
-            categories, and photos are managed separately.
-          </p>
-          <p className="mt-4">
-            <Link
-              href="/provider/dashboard"
-              className="text-sm font-medium text-stone-900 underline-offset-2 hover:underline"
-            >
-              Back to dashboard
-            </Link>
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-stone-200 bg-white px-5 py-6 shadow-sm sm:px-8 sm:py-8">
-          <EditListingForm listing={listing} />
-        </div>
-      </main>
-    </div>
+      <div className="rounded-2xl border border-stone-200 bg-white px-5 py-6 shadow-sm sm:px-8 sm:py-8">
+        <EditListingForm listing={listing} />
+      </div>
+    </ProviderDashboardShell>
   );
 }
