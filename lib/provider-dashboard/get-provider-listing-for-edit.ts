@@ -4,7 +4,7 @@ import type { ProviderEditListing } from "@/lib/provider-dashboard/types";
 type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
 
 const editListingColumns =
-  "id, business_name, short_description, description, phone, website, address, city, state, zip_code";
+  "id, business_name, short_description, description, phone, website, address, city, state, zip_code, logo_url";
 
 /**
  * Finds the provider directory row whose email matches the signed-in user (case-insensitive).

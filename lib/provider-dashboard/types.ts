@@ -21,4 +21,5 @@ export type ProviderEditListing = {
   city: string | null;
   state: string | null;
   zip_code: string | null;
+  logo_url: string | null;
 };

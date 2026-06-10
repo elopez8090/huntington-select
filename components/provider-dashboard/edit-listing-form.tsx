@@ -2,8 +2,14 @@
 
 import { FormMessage } from "@/components/auth/form-message";
 import { updateProviderListing } from "@/lib/provider-dashboard/update-provider-listing";
+import { uploadProviderLogo } from "@/lib/provider-dashboard/upload-provider-logo";
 import type { ProviderEditListing } from "@/lib/provider-dashboard/types";
-import { useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 
 const inputClassName =
   "mt-1 block w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 shadow-sm outline-none transition focus:border-amber-700/50 focus:ring-2 focus:ring-amber-100";
@@ -16,6 +22,30 @@ export function EditListingForm({ listing }: EditListingFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
+    listing.logo_url,
+  );
+
+  useEffect(() => {
+    return () => {
+      if (logoPreviewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(logoPreviewUrl);
+      }
+    };
+  }, [logoPreviewUrl]);
+
+  function handleLogoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    setLogoPreviewUrl((previous) => {
+      if (previous?.startsWith("blob:")) {
+        URL.revokeObjectURL(previous);
+      }
+      return URL.createObjectURL(file);
+    });
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,6 +55,22 @@ export function EditListingForm({ listing }: EditListingFormProps) {
 
     const form = event.currentTarget;
     const formData = new FormData(form);
+
+    const logoFile = formData.get("logo");
+    if (logoFile instanceof File && logoFile.size > 0) {
+      const logoResult = await uploadProviderLogo(logoFile);
+      if (!logoResult.ok) {
+        setIsSubmitting(false);
+        setError(logoResult.error);
+        return;
+      }
+      setLogoPreviewUrl((previous) => {
+        if (previous?.startsWith("blob:")) {
+          URL.revokeObjectURL(previous);
+        }
+        return logoResult.logoUrl;
+      });
+    }
 
     const result = await updateProviderListing({
       businessName: String(formData.get("businessName") ?? ""),
@@ -54,6 +100,42 @@ export function EditListingForm({ listing }: EditListingFormProps) {
       {success ? <FormMessage variant="success" message={success} /> : null}
 
       <div className="grid gap-6 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <p className="text-sm font-medium text-stone-700">Business logo</p>
+          <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-stone-200 bg-stone-50">
+              {logoPreviewUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={logoPreviewUrl}
+                  alt="Your business logo preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center px-2 text-center text-xs text-stone-400">
+                  No logo yet
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <label
+                htmlFor="edit-logo"
+                className="block text-sm text-stone-600"
+              >
+                Upload a square image (JPEG, PNG, WebP, or GIF, max 1 MB).
+              </label>
+              <input
+                id="edit-logo"
+                name="logo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleLogoChange}
+                className="mt-2 block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-stone-800 hover:file:bg-stone-200"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="sm:col-span-2">
           <label
             htmlFor="edit-business-name"
