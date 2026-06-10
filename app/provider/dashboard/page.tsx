@@ -59,7 +59,17 @@ export default async function ProviderDashboardPage() {
         </div>
 
         {listing ? (
-          <ProviderListingSummary listing={listing} />
+          <>
+            <div className="mb-4 flex justify-end">
+              <Link
+                href="/provider/edit-listing"
+                className="inline-flex items-center justify-center rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-900 shadow-sm transition hover:border-stone-400 hover:bg-stone-50"
+              >
+                Edit Listing
+              </Link>
+            </div>
+            <ProviderListingSummary listing={listing} />
+          </>
         ) : (
           <div className="rounded-2xl border border-stone-200 bg-white px-5 py-8 text-center shadow-sm sm:px-8">
             <h2 className="text-lg font-semibold text-stone-900">
