@@ -1,3 +1,4 @@
+import { LogoutButton } from "@/components/auth/logout-button";
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { RecentRedemptions } from "@/components/dashboard/recent-redemptions";
 import { getDashboardData } from "@/lib/dashboard/get-dashboard-data";
@@ -38,7 +39,10 @@ export default async function DashboardPage() {
           >
             Huntington Select
           </Link>
-          <span className="truncate text-sm text-zinc-600">{dashboard.email}</span>
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <span className="truncate text-sm text-zinc-600">{dashboard.email}</span>
+            <LogoutButton tone="zinc" />
+          </div>
         </div>
       </header>
 

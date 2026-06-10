@@ -1,4 +1,5 @@
 import { AdminNav } from "@/components/admin/admin-nav";
+import { LogoutButton } from "@/components/auth/logout-button";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -19,7 +20,10 @@ export function AdminShell({ email, children }: AdminShellProps) {
             >
               Huntington Select
             </Link>
-            <span className="truncate text-sm text-stone-600">{email}</span>
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <span className="truncate text-sm text-stone-600">{email}</span>
+              <LogoutButton tone="stone" />
+            </div>
           </div>
           <AdminNav />
         </div>
