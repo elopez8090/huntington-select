@@ -2,6 +2,7 @@
 
 import { FormMessage } from "@/components/auth/form-message";
 import { updateProviderListing } from "@/lib/provider-dashboard/update-provider-listing";
+import { uploadProviderCover } from "@/lib/provider-dashboard/upload-provider-cover";
 import { uploadProviderLogo } from "@/lib/provider-dashboard/upload-provider-logo";
 import type { ProviderEditListing } from "@/lib/provider-dashboard/types";
 import {
@@ -22,9 +23,20 @@ export function EditListingForm({ listing }: EditListingFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(
+    listing.cover_image_url,
+  );
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
     listing.logo_url,
   );
+
+  useEffect(() => {
+    return () => {
+      if (coverPreviewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(coverPreviewUrl);
+      }
+    };
+  }, [coverPreviewUrl]);
 
   useEffect(() => {
     return () => {
@@ -33,6 +45,19 @@ export function EditListingForm({ listing }: EditListingFormProps) {
       }
     };
   }, [logoPreviewUrl]);
+
+  function handleCoverChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    setCoverPreviewUrl((previous) => {
+      if (previous?.startsWith("blob:")) {
+        URL.revokeObjectURL(previous);
+      }
+      return URL.createObjectURL(file);
+    });
+  }
 
   function handleLogoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -55,6 +80,22 @@ export function EditListingForm({ listing }: EditListingFormProps) {
 
     const form = event.currentTarget;
     const formData = new FormData(form);
+
+    const coverFile = formData.get("cover");
+    if (coverFile instanceof File && coverFile.size > 0) {
+      const coverResult = await uploadProviderCover(coverFile);
+      if (!coverResult.ok) {
+        setIsSubmitting(false);
+        setError(coverResult.error);
+        return;
+      }
+      setCoverPreviewUrl((previous) => {
+        if (previous?.startsWith("blob:")) {
+          URL.revokeObjectURL(previous);
+        }
+        return coverResult.coverImageUrl;
+      });
+    }
 
     const logoFile = formData.get("logo");
     if (logoFile instanceof File && logoFile.size > 0) {
@@ -100,6 +141,45 @@ export function EditListingForm({ listing }: EditListingFormProps) {
       {success ? <FormMessage variant="success" message={success} /> : null}
 
       <div className="grid gap-6 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <p className="text-sm font-medium text-stone-700">Cover image</p>
+          <p className="mt-1 text-sm text-stone-600">
+            Wide banner shown at the top of your public profile.
+          </p>
+          <div className="mt-2 space-y-4">
+            <div className="relative aspect-[21/9] w-full overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50/80 sm:aspect-[2.5/1]">
+              {coverPreviewUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={coverPreviewUrl}
+                  alt="Your cover image preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-stone-500">
+                  No cover image yet — default banner on your profile
+                </div>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="edit-cover"
+                className="block text-sm text-stone-600"
+              >
+                Upload a wide image (JPEG, PNG, WebP, or GIF, max 1 MB).
+              </label>
+              <input
+                id="edit-cover"
+                name="cover"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleCoverChange}
+                className="mt-2 block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-stone-800 hover:file:bg-stone-200"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="sm:col-span-2">
           <p className="text-sm font-medium text-stone-700">Business logo</p>
           <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">

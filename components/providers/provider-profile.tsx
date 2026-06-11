@@ -28,16 +28,16 @@ export function ProviderProfile({ provider }: ProviderProfileProps) {
 
   return (
     <article className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
-      {provider.cover_image_url ? (
-        <div className="relative aspect-[21/9] w-full overflow-hidden bg-stone-100 sm:aspect-[2.5/1]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="relative aspect-[21/9] w-full overflow-hidden bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50/80 sm:aspect-[2.5/1]">
+        {provider.cover_image_url ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={provider.cover_image_url}
             alt=""
             className="h-full w-full object-cover"
           />
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       <div className="border-b border-stone-100 px-5 py-6 sm:px-8 sm:py-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">

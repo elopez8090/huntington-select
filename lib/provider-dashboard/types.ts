@@ -22,4 +22,5 @@ export type ProviderEditListing = {
   state: string | null;
   zip_code: string | null;
   logo_url: string | null;
+  cover_image_url: string | null;
 };
