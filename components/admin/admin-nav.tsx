@@ -11,6 +11,7 @@ const navLinkClass = (active: boolean) =>
 export function AdminNav() {
   const pathname = usePathname();
   const isApplications = pathname.startsWith("/admin/provider-applications");
+  const isProviders = pathname.startsWith("/admin/providers");
   const isOverview = pathname === "/admin" || pathname === "/admin/";
 
   return (
@@ -23,6 +24,9 @@ export function AdminNav() {
         className={navLinkClass(isApplications)}
       >
         Provider applications
+      </Link>
+      <Link href="/admin/providers" className={navLinkClass(isProviders)}>
+        Manage providers
       </Link>
     </nav>
   );

@@ -19,7 +19,7 @@ export type ProviderListItem = {
   city: string | null;
   state: string | null;
   logo_url: string | null;
-  featured: boolean;
+  is_featured: boolean;
   categories: ProviderCategoryRef[];
 };
 
@@ -38,6 +38,6 @@ export type ProviderDetail = {
   zip_code: string | null;
   logo_url: string | null;
   cover_image_url: string | null;
-  featured: boolean;
+  is_featured: boolean;
   categories: ProviderCategoryRef[];
 };

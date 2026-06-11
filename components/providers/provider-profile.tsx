@@ -57,9 +57,9 @@ export function ProviderProfile({ provider }: ProviderProfileProps) {
               <h1 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
                 {provider.business_name}
               </h1>
-              {provider.featured ? (
+              {provider.is_featured ? (
                 <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-900 ring-1 ring-amber-200/80">
-                  Featured
+                  Featured provider
                 </span>
               ) : null}
             </div>

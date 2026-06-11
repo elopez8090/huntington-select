@@ -38,7 +38,7 @@ export function ProviderCard({ provider }: ProviderCardProps) {
             <h2 className="text-lg font-semibold tracking-tight text-stone-900 group-hover:text-stone-950">
               {provider.business_name}
             </h2>
-            {provider.featured ? (
+            {provider.is_featured ? (
               <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-900 ring-1 ring-amber-200/80">
                 Featured
               </span>

@@ -37,6 +37,15 @@ export function ProvidersDirectory({
     });
   }, [providers, search, categorySlug]);
 
+  const sortedFiltered = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (a.is_featured !== b.is_featured) {
+        return a.is_featured ? -1 : 1;
+      }
+      return a.business_name.localeCompare(b.business_name);
+    });
+  }, [filtered]);
+
   if (providers.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-stone-200 bg-white px-6 py-12 text-center">
@@ -97,7 +106,7 @@ export function ProvidersDirectory({
         </div>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((provider) => (
+          {sortedFiltered.map((provider) => (
             <li key={provider.id}>
               <ProviderCard provider={provider} />
             </li>

@@ -1,6 +1,8 @@
-import Link from "next/link";
+import { FeaturedProvidersSection } from "@/components/marketing/featured-providers-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteHeader } from "@/components/marketing/site-header";
+import type { ProviderListItem } from "@/lib/providers/types";
+import Link from "next/link";
 
 const customerSteps = [
   {
@@ -108,7 +110,11 @@ const providerBenefits = [
   },
 ] as const;
 
-export function HomePage() {
+type HomePageProps = {
+  featuredProviders: ProviderListItem[];
+};
+
+export function HomePage({ featuredProviders }: HomePageProps) {
   return (
     <div className="flex min-h-full flex-1 flex-col bg-stone-50 text-stone-900">
       <SiteHeader />
@@ -147,6 +153,8 @@ export function HomePage() {
             </div>
           </div>
         </section>
+
+        <FeaturedProvidersSection providers={featuredProviders} />
 
         <section
           id="how-it-works"

@@ -4,7 +4,7 @@ import type { ProviderDashboardListing } from "@/lib/provider-dashboard/types";
 type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
 
 const listingColumns =
-  "business_name, status, featured, city, state, phone, email, website, short_description";
+  "business_name, status, is_featured, city, state, phone, email, website, short_description";
 
 /**
  * Finds the provider directory row whose email matches the signed-in user (case-insensitive).

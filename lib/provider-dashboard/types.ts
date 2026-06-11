@@ -1,7 +1,7 @@
 export type ProviderDashboardListing = {
   business_name: string;
   status: string;
-  featured: boolean;
+  is_featured: boolean;
   city: string | null;
   state: string | null;
   phone: string | null;

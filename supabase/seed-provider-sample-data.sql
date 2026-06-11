@@ -68,7 +68,7 @@ insert into public.providers (
   state,
   zip_code,
   status,
-  featured
+  is_featured
 )
 values
   (
