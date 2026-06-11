@@ -1,8 +1,16 @@
 "use client";
 
 import { FormMessage } from "@/components/auth/form-message";
+import {
+  ProviderFeaturedBadge,
+  ProviderStatusBadge,
+} from "@/components/admin/provider-badges";
 import type { AdminProviderRow } from "@/lib/admin/types";
-import { toggleProviderFeatured } from "@/lib/admin/toggle-provider-featured";
+import { setProviderFeatured } from "@/lib/admin/toggle-provider-featured";
+import {
+  approveProviderListing,
+  rejectProviderListing,
+} from "@/lib/admin/update-provider-status";
 import { formatCityState } from "@/lib/providers/format";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +18,7 @@ import { useState } from "react";
 
 type ProvidersTableProps = {
   providers: AdminProviderRow[];
+  emptyMessage: string;
 };
 
 function formatCreatedAt(iso: string): string {
@@ -22,66 +31,57 @@ function formatCreatedAt(iso: string): string {
   });
 }
 
-function statusBadgeClass(status: string): string {
-  switch (status) {
-    case "approved":
-      return "bg-emerald-100 text-emerald-900";
-    case "pending":
-      return "bg-amber-100 text-amber-900";
-    case "draft":
-      return "bg-stone-100 text-stone-700";
-    case "rejected":
-      return "bg-red-100 text-red-900";
-    case "archived":
-      return "bg-stone-200 text-stone-800";
-    default:
-      return "bg-stone-100 text-stone-700";
-  }
+type BusyAction =
+  | "approve"
+  | "reject"
+  | "feature"
+  | "unfeature"
+  | null;
+
+function busyKey(providerId: string, action: NonNullable<BusyAction>): string {
+  return `${providerId}:${action}`;
 }
 
-function FeaturedBadge({ featured }: { featured: boolean }) {
-  if (!featured) {
-    return (
-      <span className="text-xs text-stone-500">—</span>
-    );
-  }
-  return (
-    <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-900 ring-1 ring-amber-200/80">
-      Featured
-    </span>
-  );
-}
-
-export function ProvidersTable({ providers }: ProvidersTableProps) {
+export function ProvidersTable({
+  providers,
+  emptyMessage,
+}: ProvidersTableProps) {
   const router = useRouter();
   const [message, setMessage] = useState<{
     text: string;
     variant: "error" | "success";
   } | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyKeyState, setBusyKeyState] = useState<string | null>(null);
 
-  async function handleToggleFeatured(id: string) {
+  async function runAction(
+    providerId: string,
+    action: NonNullable<BusyAction>,
+    work: () => Promise<{ ok: boolean; error?: string }>,
+    successText: string,
+  ) {
     setMessage(null);
-    setBusyId(id);
-    const result = await toggleProviderFeatured(id);
-    setBusyId(null);
+    setBusyKeyState(busyKey(providerId, action));
+    const result = await work();
+    setBusyKeyState(null);
     if (!result.ok) {
-      setMessage({ text: result.error, variant: "error" });
+      setMessage({
+        text: result.error ?? "Something went wrong.",
+        variant: "error",
+      });
       return;
     }
-    setMessage({
-      text: result.is_featured
-        ? "Provider marked as featured."
-        : "Provider removed from featured.",
-      variant: "success",
-    });
+    setMessage({ text: successText, variant: "success" });
     router.refresh();
+  }
+
+  function isBusy(providerId: string, action: NonNullable<BusyAction>): boolean {
+    return busyKeyState === busyKey(providerId, action);
   }
 
   if (providers.length === 0) {
     return (
       <p className="rounded-xl border border-stone-200 bg-white px-4 py-8 text-center text-sm text-stone-600">
-        No providers yet. Approve an application to create a listing.
+        {emptyMessage}
       </p>
     );
   }
@@ -92,12 +92,14 @@ export function ProvidersTable({ providers }: ProvidersTableProps) {
         <FormMessage variant={message.variant} message={message.text} />
       ) : null}
 
-      <div className="hidden overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm md:block">
+      <div className="hidden overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm lg:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-stone-200 bg-stone-50 text-stone-600">
               <tr>
                 <th className="px-4 py-3 font-medium">Business</th>
+                <th className="px-4 py-3 font-medium">Provider</th>
+                <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Location</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Featured</th>
@@ -108,7 +110,14 @@ export function ProvidersTable({ providers }: ProvidersTableProps) {
             <tbody className="divide-y divide-stone-100">
               {providers.map((provider) => {
                 const location = formatCityState(provider.city, provider.state);
-                const isBusy = busyId === provider.id;
+                const canApprove = provider.status !== "approved";
+                const canReject = provider.status !== "rejected";
+                const anyBusy =
+                  isBusy(provider.id, "approve") ||
+                  isBusy(provider.id, "reject") ||
+                  isBusy(provider.id, "feature") ||
+                  isBusy(provider.id, "unfeature");
+
                 return (
                   <tr key={provider.id} className="text-stone-800">
                     <td className="px-4 py-3">
@@ -124,35 +133,123 @@ export function ProvidersTable({ providers }: ProvidersTableProps) {
                         </Link>
                       ) : null}
                     </td>
+                    <td className="px-4 py-3 text-stone-700">
+                      {provider.contact_name ?? "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {provider.email ? (
+                        <a
+                          href={`mailto:${provider.email}`}
+                          className="text-amber-900 underline-offset-2 hover:underline"
+                        >
+                          {provider.email}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-stone-600">
                       {location || "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${statusBadgeClass(provider.status)}`}
-                      >
-                        {provider.status}
-                      </span>
+                      <ProviderStatusBadge status={provider.status} />
                     </td>
                     <td className="px-4 py-3">
-                      <FeaturedBadge featured={provider.is_featured} />
+                      <ProviderFeaturedBadge featured={provider.is_featured} />
                     </td>
                     <td className="px-4 py-3 text-stone-600">
                       {formatCreatedAt(provider.created_at)}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        disabled={isBusy}
-                        onClick={() => handleToggleFeatured(provider.id)}
-                        className="rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isBusy
-                          ? "Saving…"
-                          : provider.is_featured
-                            ? "Remove featured"
-                            : "Mark featured"}
-                      </button>
+                      <div className="flex min-w-[14rem] flex-wrap gap-2">
+                        {canApprove ? (
+                          <button
+                            type="button"
+                            disabled={anyBusy}
+                            onClick={() =>
+                              runAction(
+                                provider.id,
+                                "approve",
+                                () => approveProviderListing(provider.id),
+                                "Provider approved.",
+                              )
+                            }
+                            className="rounded-lg bg-stone-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isBusy(provider.id, "approve")
+                              ? "Saving…"
+                              : "Approve"}
+                          </button>
+                        ) : null}
+                        {canReject ? (
+                          <button
+                            type="button"
+                            disabled={anyBusy}
+                            onClick={() =>
+                              runAction(
+                                provider.id,
+                                "reject",
+                                () => rejectProviderListing(provider.id),
+                                "Provider rejected.",
+                              )
+                            }
+                            className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-medium text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isBusy(provider.id, "reject")
+                              ? "Saving…"
+                              : "Reject"}
+                          </button>
+                        ) : null}
+                        {!provider.is_featured ? (
+                          <button
+                            type="button"
+                            disabled={anyBusy}
+                            onClick={() =>
+                              runAction(
+                                provider.id,
+                                "feature",
+                                () =>
+                                  setProviderFeatured(provider.id, true).then(
+                                    (r) =>
+                                      r.ok
+                                        ? r
+                                        : { ok: false, error: r.error },
+                                  ),
+                                "Provider marked as featured.",
+                              )
+                            }
+                            className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-950 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isBusy(provider.id, "feature")
+                              ? "Saving…"
+                              : "Feature"}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={anyBusy}
+                            onClick={() =>
+                              runAction(
+                                provider.id,
+                                "unfeature",
+                                () =>
+                                  setProviderFeatured(provider.id, false).then(
+                                    (r) =>
+                                      r.ok
+                                        ? r
+                                        : { ok: false, error: r.error },
+                                  ),
+                                "Provider removed from featured.",
+                              )
+                            }
+                            className="rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isBusy(provider.id, "unfeature")
+                              ? "Saving…"
+                              : "Unfeature"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -162,45 +259,135 @@ export function ProvidersTable({ providers }: ProvidersTableProps) {
         </div>
       </div>
 
-      <ul className="space-y-3 md:hidden">
+      <ul className="space-y-3 lg:hidden">
         {providers.map((provider) => {
           const location = formatCityState(provider.city, provider.state);
-          const isBusy = busyId === provider.id;
+          const canApprove = provider.status !== "approved";
+          const canReject = provider.status !== "rejected";
+          const anyBusy =
+            isBusy(provider.id, "approve") ||
+            isBusy(provider.id, "reject") ||
+            isBusy(provider.id, "feature") ||
+            isBusy(provider.id, "unfeature");
+
           return (
             <li
               key={provider.id}
               className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium text-stone-900">
                     {provider.business_name}
                   </p>
+                  {provider.contact_name ? (
+                    <p className="mt-0.5 text-sm text-stone-600">
+                      {provider.contact_name}
+                    </p>
+                  ) : null}
+                  {provider.email ? (
+                    <a
+                      href={`mailto:${provider.email}`}
+                      className="mt-1 block text-sm text-amber-900 underline-offset-2 hover:underline"
+                    >
+                      {provider.email}
+                    </a>
+                  ) : null}
                   {location ? (
-                    <p className="mt-0.5 text-xs text-stone-500">{location}</p>
+                    <p className="mt-1 text-xs text-stone-500">{location}</p>
                   ) : null}
                 </div>
-                <FeaturedBadge featured={provider.is_featured} />
+                <ProviderFeaturedBadge featured={provider.is_featured} />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${statusBadgeClass(provider.status)}`}
-                >
-                  {provider.status}
+                <ProviderStatusBadge status={provider.status} />
+                <span className="text-xs text-stone-500">
+                  Listed {formatCreatedAt(provider.created_at)}
                 </span>
               </div>
-              <button
-                type="button"
-                disabled={isBusy}
-                onClick={() => handleToggleFeatured(provider.id)}
-                className="mt-4 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm font-medium text-stone-800 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isBusy
-                  ? "Saving…"
-                  : provider.is_featured
-                    ? "Remove featured"
-                    : "Mark featured"}
-              </button>
+              {provider.status === "approved" ? (
+                <Link
+                  href={`/providers/${provider.slug}`}
+                  className="mt-3 inline-block text-sm text-amber-800 hover:underline"
+                >
+                  View public listing
+                </Link>
+              ) : null}
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {canApprove ? (
+                  <button
+                    type="button"
+                    disabled={anyBusy}
+                    onClick={() =>
+                      runAction(
+                        provider.id,
+                        "approve",
+                        () => approveProviderListing(provider.id),
+                        "Provider approved.",
+                      )
+                    }
+                    className="col-span-2 rounded-lg bg-stone-900 px-3 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1"
+                  >
+                    {isBusy(provider.id, "approve") ? "Saving…" : "Approve"}
+                  </button>
+                ) : null}
+                {canReject ? (
+                  <button
+                    type="button"
+                    disabled={anyBusy}
+                    onClick={() =>
+                      runAction(
+                        provider.id,
+                        "reject",
+                        () => rejectProviderListing(provider.id),
+                        "Provider rejected.",
+                      )
+                    }
+                    className="col-span-2 rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm font-medium text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1"
+                  >
+                    {isBusy(provider.id, "reject") ? "Saving…" : "Reject"}
+                  </button>
+                ) : null}
+                {!provider.is_featured ? (
+                  <button
+                    type="button"
+                    disabled={anyBusy}
+                    onClick={() =>
+                      runAction(
+                        provider.id,
+                        "feature",
+                        () =>
+                          setProviderFeatured(provider.id, true).then((r) =>
+                            r.ok ? r : { ok: false, error: r.error },
+                          ),
+                        "Provider marked as featured.",
+                      )
+                    }
+                    className="col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-medium text-amber-950 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isBusy(provider.id, "feature") ? "Saving…" : "Feature"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={anyBusy}
+                    onClick={() =>
+                      runAction(
+                        provider.id,
+                        "unfeature",
+                        () =>
+                          setProviderFeatured(provider.id, false).then((r) =>
+                            r.ok ? r : { ok: false, error: r.error },
+                          ),
+                        "Provider removed from featured.",
+                      )
+                    }
+                    className="col-span-2 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-medium text-stone-800 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isBusy(provider.id, "unfeature") ? "Saving…" : "Unfeature"}
+                  </button>
+                )}
+              </div>
             </li>
           );
         })}

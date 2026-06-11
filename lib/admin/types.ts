@@ -16,9 +16,19 @@ export type ProviderApplicationRow = {
   category_name: string;
 };
 
+export type AdminProviderStats = {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  featured: number;
+};
+
 export type AdminProviderRow = {
   id: string;
   business_name: string;
+  contact_name: string | null;
+  email: string | null;
   slug: string;
   city: string | null;
   state: string | null;

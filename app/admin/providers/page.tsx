@@ -1,4 +1,11 @@
+import { ProvidersSummary } from "@/components/admin/providers-summary";
 import { ProvidersTable } from "@/components/admin/providers-table";
+import { ProvidersToolbar } from "@/components/admin/providers-toolbar";
+import {
+  parseAdminProviderFilter,
+  sanitizeAdminProviderSearch,
+} from "@/lib/admin/admin-provider-filters";
+import { getAdminProviderStats } from "@/lib/admin/get-admin-provider-stats";
 import { getProvidersForAdmin } from "@/lib/admin/get-providers-for-admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -7,9 +14,22 @@ export const metadata = {
   description: "Manage provider listings and featured status.",
 };
 
-export default async function AdminProvidersPage() {
+type AdminProvidersPageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function AdminProvidersPage({
+  searchParams,
+}: AdminProvidersPageProps) {
+  const params = await searchParams;
+  const filter = parseAdminProviderFilter(params.filter);
+  const search = sanitizeAdminProviderSearch(params.q);
+
   const supabase = await createClient();
-  const providers = await getProvidersForAdmin(supabase);
+  const [stats, providers] = await Promise.all([
+    getAdminProviderStats(supabase),
+    getProvidersForAdmin(supabase, { filter, search }),
+  ]);
 
   return (
     <>
@@ -21,12 +41,27 @@ export default async function AdminProvidersPage() {
           Manage providers
         </h1>
         <p className="mt-2 text-sm text-stone-600">
-          View directory listings and choose which approved providers appear as
-          featured on the homepage and directory.
+          Review listings, update approval status, and choose which approved
+          providers appear as featured on the homepage and directory.
         </p>
       </div>
 
-      <ProvidersTable providers={providers} />
+      <div className="space-y-6">
+        <ProvidersSummary
+          stats={stats}
+          activeFilter={filter}
+          search={search}
+        />
+        <ProvidersToolbar activeFilter={filter} search={search} />
+        <ProvidersTable
+          providers={providers}
+          emptyMessage={
+            search || filter !== "all"
+              ? "No providers match your filters. Try a different search or filter."
+              : "No providers yet. Approve an application to create a listing."
+          }
+        />
+      </div>
     </>
   );
 }
