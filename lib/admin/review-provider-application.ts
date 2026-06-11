@@ -2,6 +2,10 @@
 
 import { makeUniqueProviderSlug } from "@/lib/admin/make-provider-slug";
 import { assertAdminForAction } from "@/lib/auth/require-admin";
+import {
+  notifyProviderApplicationApproved,
+  notifyProviderApplicationRejected,
+} from "@/lib/email/provider-application-notifications";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -136,6 +140,11 @@ export async function approveProviderApplication(
   revalidatePath("/admin/provider-applications");
   revalidatePath("/providers");
 
+  void notifyProviderApplicationApproved({
+    toEmail: app.email,
+    businessName: app.business_name,
+  });
+
   return { ok: true };
 }
 
@@ -156,7 +165,7 @@ export async function rejectProviderApplication(
 
   const { data: application, error: fetchError } = await supabase
     .from("provider_applications")
-    .select("id, status")
+    .select("id, status, email, contact_name")
     .eq("id", id)
     .maybeSingle();
 
@@ -193,6 +202,11 @@ export async function rejectProviderApplication(
 
   revalidatePath("/admin");
   revalidatePath("/admin/provider-applications");
+
+  void notifyProviderApplicationRejected({
+    toEmail: application.email,
+    contactName: application.contact_name,
+  });
 
   return { ok: true };
 }

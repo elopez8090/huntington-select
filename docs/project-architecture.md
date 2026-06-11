@@ -246,6 +246,9 @@ Store these in Vercel (and locally in `.env.local`):
 - `SUPABASE_SERVICE_ROLE_KEY` (server only — never expose to client)
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL` (verified sender in Resend; optional locally — defaults to Resend test sender)
+- `ADMIN_NOTIFICATION_EMAIL` (where new provider application alerts are sent)
+- `NEXT_PUBLIC_APP_URL` (optional; email links — falls back to `VERCEL_URL` or localhost)
 
 ### Deployment flow
 

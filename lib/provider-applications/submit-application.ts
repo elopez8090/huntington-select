@@ -1,5 +1,8 @@
 "use server";
 
+import {
+  notifyAdminProviderApplicationSubmitted,
+} from "@/lib/email/provider-application-notifications";
 import { createClient } from "@/lib/supabase/server";
 
 export type SubmitProviderApplicationInput = {
@@ -69,27 +72,42 @@ export async function submitProviderApplication(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { error } = await supabase.from("provider_applications").insert({
-    user_id: user?.id ?? null,
-    business_name: businessName,
-    contact_name: contactName,
-    email,
-    phone,
-    website: website || null,
-    service_category_id: serviceCategoryId,
-    city,
-    short_description: shortDescription,
-    why_select: whySelect,
-    status: "pending",
-  });
+  const { error: insertError } = await supabase
+    .from("provider_applications")
+    .insert({
+      user_id: user?.id ?? null,
+      business_name: businessName,
+      contact_name: contactName,
+      email,
+      phone,
+      website: website || null,
+      service_category_id: serviceCategoryId,
+      city,
+      short_description: shortDescription,
+      why_select: whySelect,
+      status: "pending",
+    });
 
-  if (error) {
+  if (insertError) {
     return {
       ok: false,
       error:
         "We could not save your application. Please try again in a moment.",
     };
   }
+
+  const { data: category } = await supabase
+    .from("service_categories")
+    .select("name")
+    .eq("id", serviceCategoryId)
+    .maybeSingle();
+
+  void notifyAdminProviderApplicationSubmitted({
+    applicantName: contactName,
+    businessName,
+    email,
+    categoryName: category?.name ?? "—",
+  });
 
   return { ok: true };
 }
